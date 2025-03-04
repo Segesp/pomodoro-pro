@@ -5,32 +5,28 @@ import type { NextRequest } from 'next/server';
 export default withAuth(
   function middleware(req) {
     const isAuth = !!req.nextauth.token;
-    const isAuthPage = req.nextUrl.pathname.startsWith('/login');
+    const isAuthPage = req.nextUrl.pathname === '/login';
+    const isPublicPage = req.nextUrl.pathname === '/';
 
-    if (isAuthPage) {
-      if (isAuth) {
-        return NextResponse.redirect(new URL('/timer', req.url));
-      }
-      return null;
+    if (isAuthPage && isAuth) {
+      return NextResponse.redirect(new URL('/timer', req.url));
     }
 
-    if (!isAuth) {
-      let from = req.nextUrl.pathname;
-      if (from) {
-        return NextResponse.redirect(
-          new URL(`/login?callbackUrl=${encodeURIComponent(from)}`, req.url)
-        );
-      }
-      return NextResponse.redirect(new URL('/login', req.url));
+    if (!isAuth && !isAuthPage && !isPublicPage) {
+      return NextResponse.redirect(
+        new URL(`/login?callbackUrl=${encodeURIComponent(req.nextUrl.pathname)}`, req.url)
+      );
     }
+
+    return NextResponse.next();
   },
   {
     callbacks: {
-      authorized: ({ token }) => !!token,
+      authorized: ({ token }) => true,
     },
   }
 );
 
 export const config = {
-  matcher: ["/timer", "/login"],
+  matcher: ["/timer", "/login", "/"],
 }; 

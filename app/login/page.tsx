@@ -11,21 +11,13 @@ function LoginContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const callbackUrl = searchParams?.get('callbackUrl') || '/timer';
 
   useEffect(() => {
-    const errorMessage = searchParams?.get('error');
-    if (errorMessage) {
-      setError(decodeURIComponent(errorMessage));
-      console.error('Error from URL:', errorMessage);
+    if (status === "authenticated") {
+      router.replace(callbackUrl);
     }
-  }, [searchParams]);
-
-  useEffect(() => {
-    if (status === "authenticated" && session?.user) {
-      console.log('Sesión autenticada:', session.user);
-      router.replace('/timer');
-    }
-  }, [status, session, router]);
+  }, [status, router, callbackUrl]);
 
   const handleCredentialsSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -37,23 +29,17 @@ function LoginContent() {
     const password = formData.get('password') as string;
 
     try {
-      console.log('Intentando iniciar sesión con credenciales...');
       const result = await signIn('credentials', {
         email,
         password,
         redirect: false,
-        callbackUrl: '/timer'
+        callbackUrl,
       });
 
-      console.log('Resultado del inicio de sesión:', result);
-
       if (result?.error) {
-        console.error('Error de inicio de sesión:', result.error);
         setError(result.error);
-      } else if (result?.ok) {
-        console.log('Inicio de sesión exitoso, redirigiendo...');
-        router.replace('/timer');
       }
+      // No necesitamos hacer router.replace aquí porque el useEffect se encargará de la redirección
     } catch (err) {
       console.error('Error al iniciar sesión:', err);
       setError("Ocurrió un error al iniciar sesión");
@@ -65,9 +51,8 @@ function LoginContent() {
   const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true);
-      console.log('Iniciando sesión con Google...');
       await signIn('google', { 
-        callbackUrl: '/timer',
+        callbackUrl,
         redirect: true
       });
     } catch (err) {
