@@ -32,18 +32,12 @@ function LoginContent() {
       const result = await signIn('credentials', {
         email,
         password,
-        redirect: false,
+        redirect: true,
         callbackUrl,
       });
-
-      if (result?.error) {
-        setError(result.error);
-      }
-      // No necesitamos hacer router.replace aquí porque el useEffect se encargará de la redirección
     } catch (err) {
       console.error('Error al iniciar sesión:', err);
       setError("Ocurrió un error al iniciar sesión");
-    } finally {
       setIsLoading(false);
     }
   };
