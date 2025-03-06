@@ -3,11 +3,17 @@ import { redirect } from "next/navigation";
 import { authOptions } from "./api/auth/[...nextauth]/route";
 
 export default async function Home() {
-  const session = await getServerSession(authOptions);
-
-  if (!session) {
+  try {
+    const session = await getServerSession(authOptions);
+    
+    // Redirigir basado en el estado de autenticación
+    if (!session?.user) {
+      redirect('/login');
+    } else {
+      redirect('/timer');
+    }
+  } catch (error) {
+    console.error('Error al verificar la sesión:', error);
     redirect('/login');
   }
-
-  redirect('/timer');
 } 

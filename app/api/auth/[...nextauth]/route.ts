@@ -4,14 +4,27 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 
+if (!process.env.GOOGLE_ID || !process.env.GOOGLE_SECRET) {
+  throw new Error('Faltan las credenciales de Google OAuth');
+}
+
+if (!process.env.NEXTAUTH_SECRET) {
+  throw new Error('Falta NEXTAUTH_SECRET');
+}
+
 // Asegurarnos de que estamos usando la URL correcta
 const BASE_URL = process.env.NEXTAUTH_URL || 'https://pomodoro-pro.vercel.app';
 
 export const authOptions: AuthOptions = {
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_ID!,
-      clientSecret: process.env.GOOGLE_SECRET!,
+      clientId: process.env.GOOGLE_ID,
+      clientSecret: process.env.GOOGLE_SECRET,
+      authorization: {
+        params: {
+          prompt: "select_account"
+        }
+      }
     }),
     CredentialsProvider({
       name: "Credenciales",
@@ -59,7 +72,7 @@ export const authOptions: AuthOptions = {
       try {
         if (account?.provider === "google") {
           if (!user.email) {
-            throw new Error('No se pudo obtener el email de Google');
+            return false;
           }
           
           const existingUser = await prisma.user.findUnique({
@@ -88,32 +101,22 @@ export const authOptions: AuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.email = user.email;
-        token.name = user.name;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
-        session.user.email = token.email as string;
-        session.user.name = token.name as string;
       }
       return session;
     },
     async redirect({ url, baseUrl }) {
-      // Si la URL comienza con /, convertirla a absoluta
-      if (url.startsWith('/')) {
+      if (url.startsWith("/")) {
         return `${baseUrl}${url}`;
-      }
-      
-      // Si la URL comienza con el base URL, permitirla
-      if (url.startsWith(baseUrl)) {
+      } else if (url.startsWith(baseUrl)) {
         return url;
       }
-      
-      // Por defecto, redirigir al timer
-      return `${baseUrl}/timer`;
+      return baseUrl;
     }
   },
   session: {

@@ -2,22 +2,16 @@
 const nextConfig = {
   output: 'standalone',
   experimental: {
-    serverActions: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
+    // serverActions ya no es necesario en Next.js 14
   },
   env: {
-    NEXTAUTH_URL: 'https://pomodoro-pro.vercel.app',
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     DATABASE_URL: process.env.DATABASE_URL,
     GOOGLE_ID: process.env.GOOGLE_ID,
     GOOGLE_SECRET: process.env.GOOGLE_SECRET,
   },
-  publicRuntimeConfig: {
-    NEXT_PUBLIC_NEXTAUTH_URL: 'https://pomodoro-pro.vercel.app',
-  },
-  async headers() {
+  headers: async () => {
     return [
       {
         source: '/:path*',
@@ -32,4 +26,4 @@ const nextConfig = {
   },
 }
 
-module.exports = nextConfig 
+module.exports = nextConfig; 

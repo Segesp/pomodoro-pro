@@ -4,34 +4,24 @@ import { NextResponse } from "next/server";
 // Proteger rutas específicas
 export default withAuth(
   function middleware(req) {
-    const isAuthPage = req.nextUrl.pathname === '/login';
-    const isTimerPage = req.nextUrl.pathname === '/timer';
-    const isRootPage = req.nextUrl.pathname === '/';
+    const { pathname } = req.nextUrl;
+    const token = req.nextauth.token;
 
-    // Si el usuario está autenticado y trata de acceder a login, redirigir a timer
-    if (isAuthPage && req.nextauth.token) {
+    // Si el usuario está autenticado y trata de acceder a /login
+    if (pathname === '/login' && token) {
       return NextResponse.redirect(new URL('/timer', req.url));
+    }
+
+    // Si el usuario no está autenticado y trata de acceder a rutas protegidas
+    if (!token && pathname !== '/login') {
+      return NextResponse.redirect(new URL('/login', req.url));
     }
 
     return NextResponse.next();
   },
   {
     callbacks: {
-      // Solo permitir acceso a rutas protegidas si hay token
-      authorized: ({ req, token }) => {
-        const isAuthPage = req.nextUrl.pathname === '/login';
-        
-        // Permitir acceso a la página de login sin autenticación
-        if (isAuthPage) {
-          return true;
-        }
-
-        // Requerir token para otras rutas
-        return !!token;
-      },
-    },
-    pages: {
-      signIn: '/login',
+      authorized: ({ token }) => true, // Permitimos que el middleware maneje todas las rutas
     },
   }
 );
