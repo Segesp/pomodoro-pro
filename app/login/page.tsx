@@ -59,21 +59,10 @@ function LoginContent() {
   const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true);
-      const result = await signIn('google', { 
+      await signIn('google', { 
         callbackUrl,
-        redirect: false
+        redirect: true
       });
-
-      if (result?.error) {
-        setError(result.error);
-        setIsLoading(false);
-        return;
-      }
-
-      if (result?.ok) {
-        console.log("Inicio de sesión con Google exitoso, redirigiendo a:", callbackUrl);
-        router.push(callbackUrl);
-      }
     } catch (err) {
       console.error('Error al iniciar sesión con Google:', err);
       setError("Ocurrió un error al iniciar sesión con Google");
