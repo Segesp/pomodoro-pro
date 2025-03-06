@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
+import { authOptions } from '../auth/[...nextauth]/route';
 
 // Iniciar una nueva sesión de pomodoro
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     
     if (!session || !session.user || !session.user.id) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
@@ -36,7 +35,7 @@ export async function POST(req: Request) {
 // Obtener el historial de sesiones
 export async function GET(req: Request) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     
     if (!session || !session.user || !session.user.id) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
@@ -64,7 +63,7 @@ export async function GET(req: Request) {
 // Actualizar una sesión (marcar como completada)
 export async function PUT(req: Request) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     
     if (!session || !session.user || !session.user.id) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });

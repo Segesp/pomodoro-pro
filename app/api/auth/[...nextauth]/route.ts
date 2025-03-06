@@ -1,10 +1,8 @@
 import NextAuth, { AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { PrismaClient } from "@prisma/client";
 import { compare } from "bcryptjs";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -66,7 +64,6 @@ export const authOptions: AuthOptions = {
           });
 
           if (!existingUser) {
-            console.log('Creando nuevo usuario con Google', user.email);
             const newUser = await prisma.user.create({
               data: {
                 email: user.email,
@@ -76,7 +73,6 @@ export const authOptions: AuthOptions = {
             });
             user.id = newUser.id;
           } else {
-            console.log('Usuario existente con Google', existingUser.email);
             user.id = existingUser.id;
           }
         }
@@ -103,10 +99,13 @@ export const authOptions: AuthOptions = {
       return session;
     },
     async redirect({ url, baseUrl }) {
-      if (url.startsWith('/timer')) {
-        return `${baseUrl}/timer`;
+      if (url.startsWith('/')) {
+        return `${baseUrl}${url}`;
       }
-      return url.startsWith(baseUrl) ? url : baseUrl;
+      else if (url.startsWith(baseUrl)) {
+        return url;
+      }
+      return baseUrl;
     }
   },
   session: {

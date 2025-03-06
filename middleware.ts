@@ -1,42 +1,41 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
+import type { NextRequest } from "next/server";
 
-export default withAuth(
-  function middleware(req) {
-    // Ignorar las rutas de la API
-    if (req.nextUrl.pathname.startsWith('/api')) {
-      return NextResponse.next();
-    }
-
-    const isAuth = !!req.nextauth.token;
-    const isAuthPage = req.nextUrl.pathname === '/login';
-    const isTimerPage = req.nextUrl.pathname === '/timer';
-    const isRootPage = req.nextUrl.pathname === '/';
-
-    // Si el usuario está autenticado y trata de acceder a la página de login, redirigirlo al timer
-    if (isAuthPage && isAuth) {
-      return NextResponse.redirect(new URL('/timer', req.url));
-    }
-
-    // Si el usuario no está autenticado y trata de acceder a una página protegida, redirigirlo al login
-    if (!isAuth && (isTimerPage || isRootPage)) {
-      return NextResponse.redirect(new URL('/login', req.url));
-    }
-
+// Este middleware se ejecuta antes de cada solicitud
+export async function middleware(req: NextRequest) {
+  // No aplicar middleware a las rutas de la API o archivos estáticos
+  if (
+    req.nextUrl.pathname.startsWith('/api') ||
+    req.nextUrl.pathname.startsWith('/_next') ||
+    req.nextUrl.pathname.includes('/favicon.ico')
+  ) {
     return NextResponse.next();
-  },
-  {
-    callbacks: {
-      authorized: ({ token }) => !!token,
-    },
   }
-);
+
+  // Obtener el token del usuario de la cookie
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  const isAuthenticated = !!token;
+  
+  // Rutas y su estado de protección
+  const isLoginPage = req.nextUrl.pathname === '/login';
+  const isTimerPage = req.nextUrl.pathname === '/timer';
+  const isRootPage = req.nextUrl.pathname === '/';
+
+  // Redirigir si ya está autenticado y va a login
+  if (isAuthenticated && isLoginPage) {
+    return NextResponse.redirect(new URL('/timer', req.url));
+  }
+
+  // Redirigir si no está autenticado y va a páginas protegidas
+  if (!isAuthenticated && (isTimerPage || isRootPage)) {
+    return NextResponse.redirect(new URL('/login', req.url));
+  }
+
+  return NextResponse.next();
+}
 
 export const config = {
-  matcher: [
-    '/',
-    '/login',
-    '/timer',
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
-  ],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 }; 

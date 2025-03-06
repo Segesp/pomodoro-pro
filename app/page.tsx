@@ -8,10 +8,8 @@ export default async function Home() {
   const session = await getServerSession(authOptions);
 
   if (!session) {
-    console.log("No hay sesión, redirigiendo a /login");
     redirect('/login');
   }
 
-  console.log("Sesión encontrada, redirigiendo a /timer");
   redirect('/timer');
 } 
