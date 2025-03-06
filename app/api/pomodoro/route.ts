@@ -68,32 +68,35 @@ export async function GET(req: Request) {
   }
 }
 
-// Actualizar una sesión (marcar como completada)
+// Actualizar una sesión de pomodoro
 export async function PUT(req: Request) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session || !session.user || !session.user.id) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'No autorizado' },
+        { status: 401 }
+      );
     }
 
-    const { id } = await req.json();
+    const { id, endTime } = await req.json();
     
-    const updatedSession = await prisma.pomodoroSession.update({
+    const updatedPomodoro = await prisma.pomodoro.update({
       where: {
         id,
+        userId: session.user.id, // Asegurarse de que el pomodoro pertenece al usuario
       },
       data: {
-        completed: true,
-        endTime: new Date(),
+        endTime: new Date(endTime),
       },
     });
 
-    return NextResponse.json(updatedSession);
+    return NextResponse.json(updatedPomodoro);
   } catch (error) {
-    console.error('Error al actualizar la sesión:', error);
+    console.error('Error al actualizar el pomodoro:', error);
     return NextResponse.json(
-      { error: 'Error al actualizar la sesión' },
+      { error: 'Error al actualizar el pomodoro' },
       { status: 500 }
     );
   }
