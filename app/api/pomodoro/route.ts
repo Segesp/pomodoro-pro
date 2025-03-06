@@ -8,7 +8,8 @@ const prisma = new PrismaClient();
 export async function POST(req: Request) {
   try {
     const session = await getServerSession();
-    if (!session?.user?.id) {
+    
+    if (!session || !session.user || !session.user.id) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
@@ -24,6 +25,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(pomodoroSession);
   } catch (error) {
+    console.error('Error al crear la sesión de pomodoro:', error);
     return NextResponse.json(
       { error: 'Error al crear la sesión' },
       { status: 500 }
@@ -35,7 +37,8 @@ export async function POST(req: Request) {
 export async function GET(req: Request) {
   try {
     const session = await getServerSession();
-    if (!session?.user?.id) {
+    
+    if (!session || !session.user || !session.user.id) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
@@ -50,6 +53,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json(sessions);
   } catch (error) {
+    console.error('Error al obtener el historial:', error);
     return NextResponse.json(
       { error: 'Error al obtener el historial' },
       { status: 500 }
@@ -61,7 +65,8 @@ export async function GET(req: Request) {
 export async function PUT(req: Request) {
   try {
     const session = await getServerSession();
-    if (!session?.user?.id) {
+    
+    if (!session || !session.user || !session.user.id) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
@@ -79,6 +84,7 @@ export async function PUT(req: Request) {
 
     return NextResponse.json(updatedSession);
   } catch (error) {
+    console.error('Error al actualizar la sesión:', error);
     return NextResponse.json(
       { error: 'Error al actualizar la sesión' },
       { status: 500 }

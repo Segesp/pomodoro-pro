@@ -15,7 +15,10 @@ function LoginContent() {
 
   useEffect(() => {
     if (status === "authenticated") {
+      console.log("Usuario autenticado, redirigiendo a:", callbackUrl);
       router.replace(callbackUrl);
+    } else if (status === "unauthenticated") {
+      console.log("Usuario no autenticado, mostrando formulario de login");
     }
   }, [status, router, callbackUrl]);
 

@@ -1,4 +1,4 @@
-import NextAuth from "next-auth";
+import NextAuth, { AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaClient } from "@prisma/client";
@@ -6,7 +6,7 @@ import { compare } from "bcryptjs";
 
 const prisma = new PrismaClient();
 
-const handler = NextAuth({
+export const authOptions: AuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_ID!,
@@ -66,6 +66,7 @@ const handler = NextAuth({
           });
 
           if (!existingUser) {
+            console.log('Creando nuevo usuario con Google', user.email);
             const newUser = await prisma.user.create({
               data: {
                 email: user.email,
@@ -75,6 +76,7 @@ const handler = NextAuth({
             });
             user.id = newUser.id;
           } else {
+            console.log('Usuario existente con Google', existingUser.email);
             user.id = existingUser.id;
           }
         }
@@ -103,8 +105,7 @@ const handler = NextAuth({
     async redirect({ url, baseUrl }) {
       // Asegurarse de que las URLs sean absolutas
       const timerUrl = new URL('/timer', baseUrl).toString();
-      const loginUrl = new URL('/login', baseUrl).toString();
-
+      
       // Si la URL es relativa al timer, usar la URL absoluta del timer
       if (url === '/timer') {
         return timerUrl;
@@ -130,6 +131,8 @@ const handler = NextAuth({
   },
   debug: process.env.NODE_ENV === 'development',
   secret: process.env.NEXTAUTH_SECRET,
-});
+};
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST }; 

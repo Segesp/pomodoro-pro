@@ -6,7 +6,6 @@ import { useEffect } from 'react';
 import PomodoroTimer from '@/app/components/PomodoroTimer';
 import PomodoroHistory from "@/app/components/PomodoroHistory";
 import LofiPlayer from "@/app/components/LofiPlayer";
-import Head from 'next/head';
 
 export default function TimerPage() {
   const { data: session, status } = useSession();
@@ -32,10 +31,6 @@ export default function TimerPage() {
 
   return (
     <>
-      <Head>
-        <title>Temporizador Pomodoro - Pomodoro Pro</title>
-        <meta name="description" content="Gestiona tu tiempo de manera efectiva con nuestro temporizador Pomodoro" />
-      </Head>
       <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="bg-white shadow-xl rounded-lg p-6">
