@@ -5,6 +5,9 @@ import { signIn, useSession } from "next-auth/react";
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
+// URL base correcta
+const BASE_URL = process.env.NEXT_PUBLIC_NEXTAUTH_URL || 'https://pomodoro-pro.vercel.app';
+
 function LoginContent() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -13,8 +16,10 @@ function LoginContent() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams?.get('callbackUrl') || '/timer';
 
+  // Si ya está autenticado, redirigir al timer
   useEffect(() => {
     if (status === "authenticated") {
+      console.log("Usuario autenticado, redirigiendo a timer");
       router.push('/timer');
     }
   }, [status, router]);
@@ -39,6 +44,7 @@ function LoginContent() {
         setError(result.error);
         setIsLoading(false);
       } else if (result?.ok) {
+        console.log("Inicio de sesión exitoso, redirigiendo a", '/timer');
         router.push('/timer');
       }
     } catch (err) {
@@ -52,7 +58,7 @@ function LoginContent() {
     try {
       setIsLoading(true);
       await signIn('google', { 
-        callbackUrl: '/timer'
+        callbackUrl: `${BASE_URL}/timer`
       });
     } catch (err) {
       console.error('Error al iniciar sesión con Google:', err);

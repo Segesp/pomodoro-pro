@@ -5,6 +5,9 @@ import type { NextRequest } from "next/server";
 
 // Este middleware se ejecuta antes de cada solicitud
 export async function middleware(req: NextRequest) {
+  // Definir la URL base correcta
+  const baseUrl = process.env.NEXTAUTH_URL || 'https://pomodoro-pro.vercel.app';
+
   // No aplicar middleware a las rutas de la API o archivos estáticos
   if (
     req.nextUrl.pathname.startsWith('/api') ||
@@ -25,12 +28,12 @@ export async function middleware(req: NextRequest) {
 
   // Redirigir si ya está autenticado y va a login
   if (isAuthenticated && isLoginPage) {
-    return NextResponse.redirect(new URL('/timer', req.url));
+    return NextResponse.redirect(new URL('/timer', baseUrl));
   }
 
   // Redirigir si no está autenticado y va a páginas protegidas
   if (!isAuthenticated && (isTimerPage || isRootPage)) {
-    return NextResponse.redirect(new URL('/login', req.url));
+    return NextResponse.redirect(new URL('/login', baseUrl));
   }
 
   return NextResponse.next();

@@ -4,6 +4,9 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 
+// Asegurarnos de que estamos usando la URL correcta
+const BASE_URL = process.env.NEXTAUTH_URL || 'https://pomodoro-pro.vercel.app';
+
 export const authOptions: AuthOptions = {
   providers: [
     GoogleProvider({
@@ -99,13 +102,20 @@ export const authOptions: AuthOptions = {
       return session;
     },
     async redirect({ url, baseUrl }) {
+      const actualBaseUrl = BASE_URL;
+      
+      // Si la URL comienza con /, convertirla a absoluta
       if (url.startsWith('/')) {
-        return `${baseUrl}${url}`;
+        return `${actualBaseUrl}${url}`;
       }
-      else if (url.startsWith(baseUrl)) {
+      
+      // Si la URL comienza con el base URL, permitirla
+      if (url.startsWith(actualBaseUrl)) {
         return url;
       }
-      return baseUrl;
+      
+      // De lo contrario, redirigir a la URL base
+      return actualBaseUrl;
     }
   },
   session: {
