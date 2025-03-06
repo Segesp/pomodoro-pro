@@ -129,7 +129,7 @@ export const authOptions: AuthOptions = {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 días
   },
-  debug: process.env.NODE_ENV === 'development',
+  debug: true, // Habilitar debug para ver más información
   secret: process.env.NEXTAUTH_SECRET,
 };
 

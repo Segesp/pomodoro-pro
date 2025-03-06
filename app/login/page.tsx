@@ -16,7 +16,7 @@ function LoginContent() {
   useEffect(() => {
     if (status === "authenticated") {
       console.log("Usuario autenticado, redirigiendo a:", callbackUrl);
-      router.replace(callbackUrl);
+      router.push(callbackUrl);
     } else if (status === "unauthenticated") {
       console.log("Usuario no autenticado, mostrando formulario de login");
     }
@@ -35,9 +35,20 @@ function LoginContent() {
       const result = await signIn('credentials', {
         email,
         password,
-        redirect: true,
+        redirect: false,
         callbackUrl,
       });
+
+      if (result?.error) {
+        setError(result.error);
+        setIsLoading(false);
+        return;
+      }
+
+      if (result?.ok) {
+        console.log("Inicio de sesión exitoso, redirigiendo a:", callbackUrl);
+        router.push(callbackUrl);
+      }
     } catch (err) {
       console.error('Error al iniciar sesión:', err);
       setError("Ocurrió un error al iniciar sesión");
@@ -48,10 +59,21 @@ function LoginContent() {
   const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true);
-      await signIn('google', { 
+      const result = await signIn('google', { 
         callbackUrl,
-        redirect: true
+        redirect: false
       });
+
+      if (result?.error) {
+        setError(result.error);
+        setIsLoading(false);
+        return;
+      }
+
+      if (result?.ok) {
+        console.log("Inicio de sesión con Google exitoso, redirigiendo a:", callbackUrl);
+        router.push(callbackUrl);
+      }
     } catch (err) {
       console.error('Error al iniciar sesión con Google:', err);
       setError("Ocurrió un error al iniciar sesión con Google");
