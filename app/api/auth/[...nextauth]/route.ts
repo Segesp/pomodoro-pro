@@ -102,20 +102,18 @@ export const authOptions: AuthOptions = {
       return session;
     },
     async redirect({ url, baseUrl }) {
-      const actualBaseUrl = BASE_URL;
-      
       // Si la URL comienza con /, convertirla a absoluta
       if (url.startsWith('/')) {
-        return `${actualBaseUrl}${url}`;
+        return `${baseUrl}${url}`;
       }
       
       // Si la URL comienza con el base URL, permitirla
-      if (url.startsWith(actualBaseUrl)) {
+      if (url.startsWith(baseUrl)) {
         return url;
       }
       
-      // De lo contrario, redirigir a la URL base
-      return actualBaseUrl;
+      // Por defecto, redirigir al timer
+      return `${baseUrl}/timer`;
     }
   },
   session: {
@@ -123,6 +121,7 @@ export const authOptions: AuthOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 días
   },
   secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === 'development',
 };
 
 const handler = NextAuth(authOptions);

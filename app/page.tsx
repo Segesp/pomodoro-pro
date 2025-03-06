@@ -1,6 +1,4 @@
-import PomodoroTimer from "./components/PomodoroTimer";
 import { getServerSession } from "next-auth";
-import LoginButton from "./components/LoginButton";
 import { redirect } from "next/navigation";
 import { authOptions } from "./api/auth/[...nextauth]/route";
 

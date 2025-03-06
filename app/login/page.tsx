@@ -16,13 +16,12 @@ function LoginContent() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams?.get('callbackUrl') || '/timer';
 
-  // Si ya está autenticado, redirigir al timer
   useEffect(() => {
     if (status === "authenticated") {
-      console.log("Usuario autenticado, redirigiendo a timer");
-      router.push('/timer');
+      console.log("Usuario autenticado, redirigiendo a:", callbackUrl);
+      router.replace(callbackUrl);
     }
-  }, [status, router]);
+  }, [status, router, callbackUrl]);
 
   const handleCredentialsSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -44,8 +43,7 @@ function LoginContent() {
         setError(result.error);
         setIsLoading(false);
       } else if (result?.ok) {
-        console.log("Inicio de sesión exitoso, redirigiendo a", '/timer');
-        router.push('/timer');
+        router.replace(callbackUrl);
       }
     } catch (err) {
       console.error('Error al iniciar sesión:', err);
@@ -57,8 +55,9 @@ function LoginContent() {
   const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true);
-      await signIn('google', { 
-        callbackUrl: `${BASE_URL}/timer`
+      await signIn('google', {
+        callbackUrl,
+        redirect: true,
       });
     } catch (err) {
       console.error('Error al iniciar sesión con Google:', err);
