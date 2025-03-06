@@ -35,20 +35,9 @@ function LoginContent() {
       const result = await signIn('credentials', {
         email,
         password,
-        redirect: false,
-        callbackUrl,
+        redirect: true,
+        callbackUrl: '/timer'
       });
-
-      if (result?.error) {
-        setError(result.error);
-        setIsLoading(false);
-        return;
-      }
-
-      if (result?.ok) {
-        console.log("Inicio de sesión exitoso, redirigiendo a:", callbackUrl);
-        router.push(callbackUrl);
-      }
     } catch (err) {
       console.error('Error al iniciar sesión:', err);
       setError("Ocurrió un error al iniciar sesión");
@@ -60,7 +49,7 @@ function LoginContent() {
     try {
       setIsLoading(true);
       await signIn('google', { 
-        callbackUrl,
+        callbackUrl: '/timer',
         redirect: true
       });
     } catch (err) {

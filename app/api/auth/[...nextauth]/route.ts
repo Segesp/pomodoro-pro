@@ -86,7 +86,7 @@ export const authOptions: AuthOptions = {
         return false;
       }
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.email = user.email;
@@ -103,33 +103,16 @@ export const authOptions: AuthOptions = {
       return session;
     },
     async redirect({ url, baseUrl }) {
-      // Asegurarse de que las URLs sean absolutas
-      const timerUrl = new URL('/timer', baseUrl).toString();
-      
-      // Si la URL es relativa al timer, usar la URL absoluta del timer
-      if (url === '/timer') {
-        return timerUrl;
+      if (url.startsWith('/timer')) {
+        return `${baseUrl}/timer`;
       }
-
-      // Si la URL comienza con el baseUrl, permitirla
-      if (url.startsWith(baseUrl)) {
-        return url;
-      }
-
-      // Si es una ruta relativa, convertirla a absoluta
-      if (url.startsWith('/')) {
-        return new URL(url, baseUrl).toString();
-      }
-
-      // Por defecto, redirigir al timer
-      return timerUrl;
+      return url.startsWith(baseUrl) ? url : baseUrl;
     }
   },
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 días
   },
-  debug: true,
   secret: process.env.NEXTAUTH_SECRET,
 };
 
