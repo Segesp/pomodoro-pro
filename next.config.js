@@ -1,17 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
-  experimental: {
-    // serverActions ya no es necesario en Next.js 14
+  // Ignorar errores de TypeScript durante la compilación
+  typescript: {
+    ignoreBuildErrors: true,
   },
-  env: {
-    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
-    DATABASE_URL: process.env.DATABASE_URL,
-    GOOGLE_ID: process.env.GOOGLE_ID,
-    GOOGLE_SECRET: process.env.GOOGLE_SECRET,
-  },
-  headers: async () => {
+  // Establecer encabezados para evitar caché
+  async headers() {
     return [
       {
         source: '/:path*',

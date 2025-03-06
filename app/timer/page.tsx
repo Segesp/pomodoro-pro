@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import PomodoroTimer from '@/app/components/PomodoroTimer';
 import PomodoroHistory from "@/app/components/PomodoroHistory";
 import LofiPlayer from "@/app/components/LofiPlayer";
@@ -10,23 +10,45 @@ import LofiPlayer from "@/app/components/LofiPlayer";
 export default function TimerPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [isClient, setIsClient] = useState(false);
 
+  // Este efecto se ejecuta solo en el lado del cliente
   useEffect(() => {
+    setIsClient(true);
+    
+    console.log("Estado de sesión en timer:", status);
+    console.log("Datos de sesión en timer:", session);
+    
     if (status === "unauthenticated") {
+      console.log("Usuario no autenticado en /timer, redirigiendo a /login");
       router.replace('/login');
     }
-  }, [status, router]);
+  }, [status, session, router]);
 
-  if (status === "loading") {
+  // Mostrar estado de carga mientras se verifica la sesión
+  if (status === "loading" || !isClient) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-600"></div>
+        <span className="ml-3 text-gray-700">Verificando tu sesión...</span>
       </div>
     );
   }
 
-  if (!session) {
-    return null;
+  // Si no hay sesión después de verificar, no renderizar nada
+  // El middleware o el useEffect se encargarán de la redirección
+  if (status === "unauthenticated" || !session?.user) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
+        <div className="text-xl text-red-700 mb-4">No tienes acceso a esta página</div>
+        <button 
+          onClick={() => router.push('/login')}
+          className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+        >
+          Ir a iniciar sesión
+        </button>
+      </div>
+    );
   }
 
   return (

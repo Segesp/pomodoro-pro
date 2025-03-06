@@ -5,9 +5,6 @@ import { signIn, useSession } from "next-auth/react";
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-// URL base correcta
-const BASE_URL = process.env.NEXT_PUBLIC_NEXTAUTH_URL || 'https://pomodoro-pro.vercel.app';
-
 function LoginContent() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -17,11 +14,14 @@ function LoginContent() {
   const callbackUrl = searchParams?.get('callbackUrl') || '/timer';
 
   useEffect(() => {
-    if (status === "authenticated") {
+    console.log("Estado de autenticación:", status);
+    console.log("Datos de sesión:", session);
+    
+    if (status === "authenticated" && session?.user) {
       console.log("Usuario autenticado, redirigiendo a:", callbackUrl);
       router.replace(callbackUrl);
     }
-  }, [status, router, callbackUrl]);
+  }, [status, router, callbackUrl, session]);
 
   const handleCredentialsSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
