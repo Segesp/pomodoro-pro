@@ -1,33 +1,35 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  url = env("DATABASE_URL")
-  relationMode = "prisma"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  password      String?
-  emailVerified DateTime?
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  sessions      PomodoroSession[]
+  id        String     @id @default(cuid())
+  name      String?
+  email     String     @unique
+  password  String?
+  image     String?
+  pomodoros Pomodoro[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 }
 
-model PomodoroSession {
+model Pomodoro {
   id        String   @id @default(cuid())
   userId    String
-  startTime DateTime @default(now())
-  endTime   DateTime?
-  type      String   // 'work' o 'break'
-  completed Boolean  @default(false)
   user      User     @relation(fields: [userId], references: [id])
+  startTime DateTime
+  endTime   DateTime
+  type      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
 } 

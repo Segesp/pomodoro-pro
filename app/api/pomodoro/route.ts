@@ -1,47 +1,55 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
-import { authOptions } from '../auth/[...nextauth]/route';
+import { authOptions } from '../auth/auth.config';
 
 // Iniciar una nueva sesión de pomodoro
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    
-    if (!session || !session.user || !session.user.id) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'No autorizado' },
+        { status: 401 }
+      );
     }
 
-    const { type } = await req.json();
-    
-    const pomodoroSession = await prisma.pomodoroSession.create({
+    const data = await req.json();
+    const { startTime, endTime, type } = data;
+
+    const pomodoro = await prisma.pomodoro.create({
       data: {
         userId: session.user.id,
+        startTime: new Date(startTime),
+        endTime: new Date(endTime),
         type,
-        startTime: new Date(),
       },
     });
 
-    return NextResponse.json(pomodoroSession);
+    return NextResponse.json(pomodoro);
   } catch (error) {
-    console.error('Error al crear la sesión de pomodoro:', error);
+    console.error('Error al crear pomodoro:', error);
     return NextResponse.json(
-      { error: 'Error al crear la sesión' },
+      { error: 'Error al crear el pomodoro' },
       { status: 500 }
     );
   }
 }
 
-// Obtener el historial de sesiones
+// Obtener todas las sesiones de pomodoro del usuario
 export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    
-    if (!session || !session.user || !session.user.id) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'No autorizado' },
+        { status: 401 }
+      );
     }
 
-    const sessions = await prisma.pomodoroSession.findMany({
+    const pomodoros = await prisma.pomodoro.findMany({
       where: {
         userId: session.user.id,
       },
@@ -50,11 +58,11 @@ export async function GET(req: Request) {
       },
     });
 
-    return NextResponse.json(sessions);
+    return NextResponse.json(pomodoros);
   } catch (error) {
-    console.error('Error al obtener el historial:', error);
+    console.error('Error al obtener pomodoros:', error);
     return NextResponse.json(
-      { error: 'Error al obtener el historial' },
+      { error: 'Error al obtener los pomodoros' },
       { status: 500 }
     );
   }
